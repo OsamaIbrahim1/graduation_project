@@ -2,3 +2,4 @@
 # email
 # password
 # companyId
+# Image

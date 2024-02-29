@@ -1,7 +1,11 @@
 import userRouter from "./User/user.routes.js";
+import categoryRouter from "./Category/category.routes.js";
+import subCategoryRouter from "./subCategory/sub-category.routes.js";
 // import adminRouter from "./Admin/admin.routes.js";
 
-export { userRouter, 
-    // adminRouter
- };
-
+export {
+  userRouter,
+  // adminRouter
+  categoryRouter,
+  subCategoryRouter,
+};

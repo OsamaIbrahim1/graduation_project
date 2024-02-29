@@ -6,7 +6,7 @@ import { auth } from "../../middlewares/auth.middleware.js";
 import { systemRoles } from "../../utils/system-role.js";
 import { validationMiddleware } from "../../middlewares/validation.middleware.js";
 import * as userValidation from "./user.validation.js";
-import { multerMiddleHost } from "../../middlewares/multer.js";
+import { multerMiddleHost } from "../../middlewares/multer.middleware.js";
 import { allowedExtensions } from "../../utils/allowedExtentions.js";
 
 const router = Router();
