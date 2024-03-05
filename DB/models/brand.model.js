@@ -1,11 +1,34 @@
-// import mongoose from "mongoose";
+import mongoose from "mongoose";
 
-// const brandSchema = new mongoose.Schema(
-//   {
-//     title: { type: String, required: true, min: 3, trim: true },
-//     desc: { type: String, min: 3, trim: true },
-//   },
-//   { timestamps: true }
-// );
+const brandSchema = new mongoose.Schema(
+  {
+    name: { type: String, required: true, trim: true },
+    slug: { type: String, required: true, unique: true, trim: true },
+    Image: {
+      secure_url: { type: String, required: true },
+      public_id: { type: String, required: true, unique: true },
+    },
+    folderId: { type: String, required: true, unique: true },
+    addedBy: { type: mongoose.Types.ObjectId, ref: "User", required: true }, // Admin
+    updatedBy: { type: mongoose.Types.ObjectId, ref: "User" },
+    subCategoryId: {
+      type: mongoose.Types.ObjectId,
+      ref: "SubCategory",
+      required: true,
+    },
+    categoryId: {
+      type: mongoose.Types.ObjectId,
+      ref: "Category",
+      required: true,
+    },
+  },
+  { timestamps: true, toObject: { virtuals: true }, toJSON: { virtuals: true } }
+);
 
-// export default mongoose.models.Brand || mongoose.model("Brand", brandSchema);
+brandSchema.virtual("Products", {
+  ref: "Product",
+  localField: "_id",
+  foreignField: "brandId",
+});
+
+export default mongoose.models.Brand || mongoose.model("Brand", brandSchema);

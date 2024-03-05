@@ -1,4 +1,4 @@
-import jwt from "jsonwebtoken";
+import Jwt from "jsonwebtoken";
 import User from "../../DB/models/user.model.js";
 
 export const auth = (accessRoles) => {
@@ -14,15 +14,15 @@ export const auth = (accessRoles) => {
 
       const token = accesstoken.split(process.env.TOKEN_PREFIX)[1];
 
-      const decodedData = jwt.verify(token, process.env.JWT_SECRET_LOGIN);
+      const decodedData = Jwt.verify(token, process.env.JWT_SECRET_LOGIN);
 
       if (!decodedData || !decodedData.id)
-      return next(new Error("invalid token payload", { cause: 400 }));
-    
-    // * user check
-    const findUser = await User.findById(decodedData.id, "name email role");
+        return next(new Error("invalid token payload", { cause: 400 }));
 
-    // * loggdInUser ROle
+      // * user check
+      const findUser = await User.findById(decodedData.id, "name email role");
+
+      // * loggdInUser ROle
       if (!findUser)
         return next(new Error("please signUp first", { cause: 404 }));
 
