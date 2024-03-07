@@ -13,6 +13,8 @@ export const initiateApp = (app, express) => {
   app.use("/subCategory", Routers.subCategoryRouter);
   app.use("/brand", Routers.brandRouter);
   app.use("/product", Routers.productRouter);
+  app.use("/cart", Routers.cartRouter);
+  app.use("/favorite", Routers.favoriteRouter);
   // app.use("/admin", Routers.adminRouter);
 
   app.use(globalResponse, rollbackUploadedFiles, rollbackSavedDocuments);

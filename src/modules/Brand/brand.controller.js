@@ -214,3 +214,24 @@ export const getBrands = async (req, res, next) => {
     .status(200)
     .json({ success: true, message: "brands existing.", data: brands });
 };
+//===================================== Get Brand By Id =====================================//
+/**
+ * * structure data from query
+ * * find brand by id
+ * * response Successfully
+ */
+export const getBrandById = async (req, res, next) => {
+  // * structure data from query
+  const { brandId } = req.query;
+
+  // * find brand by id
+  const brand = await Brand.findById(brandId).populate({ path: "Products" });
+  if (!brand) {
+    return next(new Error("Brand not found", { cause: 404 }));
+  }
+
+  // * response Successfully
+  res
+    .status(200)
+    .json({ success: true, message: "brands existing.", data: brands });
+};

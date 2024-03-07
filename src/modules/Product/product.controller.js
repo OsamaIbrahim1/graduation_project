@@ -269,16 +269,22 @@ export const searchWithAnyField = async (req, res, next) => {
   const { title, desc, basePrice, discount, appliedPrice, rate } = req.body;
 
   // * search by any field
-
-  const product = await Product.find({
-    $or: [
-      { title: { $regex: title || "undefind", $options: "i" } },
-      { desc },
-      { basePrice },
-      { discount },
-      { appliedPrice },
-    ],
-  });
+  let product;
+  if (title) {
+    product = await Product.find({
+      $or: [
+        { title: { $regex: title, $options: "i" } },
+        { desc },
+        { basePrice },
+        { discount },
+        { appliedPrice },
+      ],
+    });
+  } else {
+    const product = await Product.find({
+      $or: [{ desc }, { basePrice }, { discount }, { appliedPrice }],
+    });
+  }
   if (!product) {
     return next("product not found", { cause: 404 });
   }
