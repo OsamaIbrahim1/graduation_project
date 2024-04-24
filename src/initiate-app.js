@@ -15,6 +15,7 @@ export const initiateApp = (app, express) => {
   app.use("/product", Routers.productRouter);
   app.use("/cart", Routers.cartRouter);
   app.use("/favorite", Routers.favoriteRouter);
+  app.use("/order", Routers.orderRouter);
   // app.use("/admin", Routers.adminRouter);
 
   app.use(globalResponse, rollbackUploadedFiles, rollbackSavedDocuments);

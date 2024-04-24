@@ -6,3 +6,12 @@ export function calculateSubTotal(products) {
 
   return subTotal;
 }
+
+export function calculateTotalPoints(products) {
+  let points = 0;
+  for (const product of products) {
+    points += product.cartPoints;
+  }
+
+  return points;
+}

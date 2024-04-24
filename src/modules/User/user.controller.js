@@ -5,6 +5,7 @@ import User from "../../../DB/models/user.model.js";
 import generateUniqueString from "../../utils/generate-Unique-String.js";
 import cloudinaryConnection from "../../utils/cloudinary.js";
 import generateOTP from "../../utils/generateOTP.js";
+import { APIFeature } from "../../utils/api-features.js";
 
 //===================================== Sign Up =====================================//
 /**
@@ -273,10 +274,11 @@ export const forgetPassword = async (req, res, next) => {
   const otp = generateOTP();
   const otpExpiration = new Date();
   otpExpiration.setMinutes(otpExpiration.getMinutes() + 10);
+  const hashedOTP = bcryptjs.hashSync(otp, +process.env.SALT_ROUNDS);
 
   // * update OTP in User model
   user.passwordResetOTP = {
-    code: otp,
+    code: hashedOTP,
     expiresAt: otpExpiration,
   };
   await user.save();
@@ -303,10 +305,11 @@ export const resetPasswordAfterOTP = async (req, res, next) => {
   // * check user is already exists
   const user = await User.findOne({ email });
   if (!user) return next("User not found", { cause: 400 });
-
+  console.log(otp, user.passwordResetOTP);
   // * check OTP is match code OTP and expired OTP
-  const storedOTP = user.passwordResetOTP;
-  if (storedOTP.code !== otp || new Date() > storedOTP.expiresAt) {
+  const matchedOTP = bcryptjs.compareSync(otp, user.passwordResetOTP.code);
+
+  if (!matchedOTP || new Date() > user.passwordResetOTP.expiresAt) {
     return next(new Error("Invalid or expired OTP", { cause: 401 }));
   }
 
@@ -386,4 +389,29 @@ export const updatePassword = async (req, res, next) => {
     message: "Password was successfully changed",
     data: user,
   });
+};
+
+//=============================== get All Users =================================//
+/**
+ * * destructure data from query
+ * * get all users
+ * * response successfully
+ */
+export const getAllUsers = async (req, res, next) => {
+  // * destructure data from query
+  const { page, size, sort, ...search } = req.query;
+
+  // * get all users
+  const features = new APIFeature(req.query, User.find()).pagination({
+    page,
+    size,
+  });
+  // .sort();
+
+  const users = await features.mongooseQuery;
+
+  // * response successfully
+  res
+    .status(200)
+    .json({ success: true, message: "get all users", data: users });
 };

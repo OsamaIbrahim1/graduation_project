@@ -45,6 +45,14 @@ const productSchema = new mongoose.Schema(
       ref: "SubCategory",
       required: true,
     },
+    productPoints: {
+      type: Number,
+      default: 0,
+    },
+    buyByPoints: {
+      type: Number,
+      default: 0,
+    },
   },
   { timestamps: true }
 );

@@ -8,6 +8,8 @@ export const addProductSchema = {
     basePrice: Joi.number().required(),
     discount: Joi.number().default(0),
     specs: Joi.any(),
+    productPoints: Joi.number().min(0).required(),
+    buyByPoints: Joi.number().required().greater(Joi.ref("productPoints")),
   }),
   query: Joi.object({
     categoryId: generalRules.dbId,
@@ -16,7 +18,6 @@ export const addProductSchema = {
   }),
   headers: generalRules.headersRules,
 };
-
 
 export const updateProductSchema = {
   body: Joi.object({
@@ -33,6 +34,8 @@ export const updateProductSchema = {
         Joi.string().alphanum() // Value
       )
     ),
+    productPoints: Joi.number().min(0),
+    buyByPoints: Joi.number().greater(Joi.ref("productPoints")),
   }),
   query: Joi.object({
     productId: generalRules.dbId,

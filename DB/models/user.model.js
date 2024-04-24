@@ -39,6 +39,10 @@ const userSchema = new mongoose.Schema(
       code: String,
       expiresAt: Date,
     },
+    userPoints: {
+      type: Number,
+      default: 0,
+    },
   },
   { timestamps: true }
 );

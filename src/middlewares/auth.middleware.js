@@ -23,14 +23,17 @@ export const auth = (accessRoles) => {
       const findUser = await User.findById(decodedData.id, "name email role");
 
       // * loggdInUser ROle
-      if (!findUser)
+      if (!findUser) {
         return next(new Error("please signUp first", { cause: 404 }));
+      }
 
       // authorization check
-      if (!accessRoles.includes(findUser.role))
+      if (!accessRoles.includes(findUser.role)) {
         return next(
           new Error("you are not allowed to access this route", { cause: 401 })
         );
+      }
+
       req.authUser = findUser;
       next();
     } catch (error) {

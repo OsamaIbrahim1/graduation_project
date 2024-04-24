@@ -18,7 +18,15 @@ import { systemRoles } from "../../utils/system-role.js";
  */
 export const addProduct = async (req, res, next) => {
   // * destructure  data from body and query and authUser
-  const { title, desc, basePrice, discount, specs } = req.body;
+  const {
+    title,
+    desc,
+    basePrice,
+    discount,
+    specs,
+    productPoints,
+    buyByPoints,
+  } = req.body;
   const { categoryId, subCategoryId, brandId } = req.query;
   const addedBy = req.authUser._id;
 
@@ -85,6 +93,8 @@ export const addProduct = async (req, res, next) => {
     addedBy,
     Images,
     folderId,
+    productPoints,
+    buyByPoints,
   };
   const createProduct = await Product.create(product);
   req.savedDocuments = { model: Product, _id: createProduct._id };
@@ -104,6 +114,8 @@ export const addProduct = async (req, res, next) => {
  * * authorized update product
  * * if user wants to update title product
  * * if user wants to update description product
+ * * if user wants to update product Points
+ * * if user wants to update buy By Points product
  * * if user wants to update specs product
  * * if user wants to update price product
  * * if user wants to update image product
@@ -113,15 +125,22 @@ export const addProduct = async (req, res, next) => {
  */
 export const updateProduct = async (req, res, next) => {
   // * destructure data from body and authUser
-  const { title, desc, basePrice, discount, specs, oldPublicId } = req.body;
+  const {
+    title,
+    desc,
+    basePrice,
+    discount,
+    specs,
+    oldPublicId,
+    productPoints,
+    buyByPoints,
+  } = req.body;
   const { productId } = req.query;
   const { _id } = req.authUser;
 
   // * find product by _id
   const product = await Product.findById(productId);
   if (!product) return next(new Error("Product not found", { cause: 404 }));
-
-  console.log(product.addedBy.toString(), _id);
 
   // * authorized update product
   if (
@@ -141,6 +160,26 @@ export const updateProduct = async (req, res, next) => {
 
   // * if user wants to update description product
   if (desc) product.desc = desc;
+
+  // * if user wants to update product Points
+  if (productPoints) {
+    if (productPoints > product.buyByPoints) {
+      return next(`productPoints must be less than buyByPoints`, {
+        cause: 400,
+      });
+    }
+    product.productPoints = productPoints;
+  }
+
+  // * if user wants to update buy By Points product
+  if (buyByPoints) {
+    if (product.productPoints >= buyByPoints) {
+      return next(`buyByPoints must be greater than productPoints `, {
+        cause: 400,
+      });
+    }
+    product.buyByPoints = buyByPoints;
+  }
 
   // * if user wants to update specs product
   if (specs) product.specs = JSON.parse(specs);

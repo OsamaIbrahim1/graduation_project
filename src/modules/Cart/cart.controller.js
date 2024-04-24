@@ -27,15 +27,15 @@ export const addProductToCart = async (req, res, next) => {
   if (!product) {
     return next({ message: "Product not found or not available", cause: 404 });
   }
-  // console.log(product);
+
   // * check if the user has a cart
   const userCart = await getUserCart(_id);
-  // console.log(userCart);
 
   // * check if the user has no cart, create a new cart and add the product to it
   if (!userCart) {
     const newCart = await addCart(_id, product, quantity);
-    res.status(201).json({
+
+    return res.status(201).json({
       success: true,
       message: "cart added successfully",
       data: newCart,

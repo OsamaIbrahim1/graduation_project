@@ -72,4 +72,10 @@ router.patch(
   expressAsyncHandler(userController.updatePassword)
 );
 
+router.get(
+  "/getAllUsers",
+  auth(systemRoles.ADMIN),
+  expressAsyncHandler(userController.getAllUsers)
+);
+
 export default router;

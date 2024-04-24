@@ -20,11 +20,17 @@ const cartSchema = new mongoose.Schema(
           required: true,
           default: 0,
         },
+        cartPoints: { type: Number, required: true, default: 0 },
         finalPrice: { type: Number, required: true },
         title: { type: String, required: true },
       },
     ],
     subTotal: {
+      type: Number,
+      required: true,
+      default: 0,
+    },
+    totalPoints: {
       type: Number,
       required: true,
       default: 0,

@@ -5,6 +5,7 @@ import brandRouter from "./Brand/brand.routes.js";
 import productRouter from "./Product/product.routes.js";
 import cartRouter from "./Cart/cart.routes.js";
 import favoriteRouter from "./Favorites/favorites.routes.js";
+import orderRouter from "./Order/order.routes.js";
 // import adminRouter from "./Admin/admin.routes.js";
 
 export {
@@ -16,4 +17,5 @@ export {
   productRouter,
   cartRouter,
   favoriteRouter,
+  orderRouter,
 };
