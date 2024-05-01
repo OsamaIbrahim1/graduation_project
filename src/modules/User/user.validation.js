@@ -3,7 +3,7 @@ import { generalRules } from "../../utils/general.validation.rule.js";
 
 export const signUpSchema = {
   body: Joi.object({
-    name: Joi.string().min(3).required(),
+    name: Joi.string().min(3).required().alphanum(),
     email: Joi.string().required().email().trim().lowercase(),
     password: Joi.string().required().min(6),
     phoneNumber: Joi.string().required().pattern(new RegExp("^[0-9]{11}$")),
@@ -47,18 +47,20 @@ export const forgetPasswordSchema = {
   }),
 };
 
-export const resetPasswordAfterOTPSchema = {
+export const resetPasswordSchema = {
   body: Joi.object({
-    email: Joi.string().email().required(),
-    otp: Joi.string().required(),
     newPassword: Joi.string().min(6).max(15).required(),
   }),
+  params: Joi.object({
+    token: Joi.string().required(),
+  }),
 };
+
 export const updatePasswordSchema = {
   body: Joi.object({
     oldPassword: Joi.string().required().min(6),
     newPassword: Joi.string().required().min(6),
-    confirmPassword:Joi.string().required().min(6)
-  }).with('newPassword', 'confirmPassword'),
+    confirmPassword: Joi.string().required().min(6),
+  }).with("newPassword", "confirmPassword"),
   headers: generalRules.headersRules,
 };

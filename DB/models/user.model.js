@@ -35,13 +35,16 @@ const userSchema = new mongoose.Schema(
       public_id: { type: String, unique: true },
     },
     folderId: { type: String, unique: true },
-    passwordResetOTP: {
-      code: String,
-      expiresAt: Date,
-    },
+    // passwordResetOTP: {
+    //   code: String,
+    //   expiresAt: Date,
+    // },
     userPoints: {
       type: Number,
       default: 0,
+    },
+    forgetCode: {
+      type: String,
     },
   },
   { timestamps: true }

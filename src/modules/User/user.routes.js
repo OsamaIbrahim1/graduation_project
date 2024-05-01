@@ -53,16 +53,16 @@ router.post(
   expressAsyncHandler(userController.uploadImageUser)
 );
 
-router.get(
+router.post(
   "/forgetPassword",
   validationMiddleware(userValidation.forgetPasswordSchema),
   expressAsyncHandler(userController.forgetPassword)
 );
 
-router.patch(
-  "/resetPasswordAfterOTP",
-  validationMiddleware(userValidation.resetPasswordAfterOTPSchema),
-  expressAsyncHandler(userController.resetPasswordAfterOTP)
+router.post(
+  "/resetPassword/:token",
+  validationMiddleware(userValidation.resetPasswordSchema),
+  expressAsyncHandler(userController.resetPassword)
 );
 
 router.patch(

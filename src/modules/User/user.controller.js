@@ -6,6 +6,7 @@ import generateUniqueString from "../../utils/generate-Unique-String.js";
 import cloudinaryConnection from "../../utils/cloudinary.js";
 import generateOTP from "../../utils/generateOTP.js";
 import { APIFeature } from "../../utils/api-features.js";
+import sendEmailService from "../../services/send-email.service.js";
 
 //===================================== Sign Up =====================================//
 /**
@@ -254,82 +255,109 @@ export const uploadImageUser = async (req, res, next) => {
     .json({ success: true, message: "Successfully uploaded", data: user });
 };
 
-//============================= forget password user =============================//
+//==================================  Forget password =========================//
 /**
- * * destructuring data from req.body
- * * check user is already exists
- * * generate OTP and time to Expire OTP
- * * update OTP in User model
+ * * destructure data from body
+ * * get user by email
+ * * generate reset password code
+ * * hash code
+ * * generate token to reset password
+ * * send reset password email to the user and check if sent
+ * * saved changes
  * * response successfully
  */
 export const forgetPassword = async (req, res, next) => {
-  // * destructuring data from req.body
+  // * destructure data from body
   const { email } = req.body;
 
-  // * check user is already exists
+  // * get user by email
   const user = await User.findOne({ email });
-  if (!user) return next(new Error("User not found", { cause: 400 }));
+  if (!user) {
+    return next("user not found", { cause: 404 });
+  }
 
-  // * generate OTP and time to Expire OTP
-  const otp = generateOTP();
-  const otpExpiration = new Date();
-  otpExpiration.setMinutes(otpExpiration.getMinutes() + 10);
-  const hashedOTP = bcryptjs.hashSync(otp, +process.env.SALT_ROUNDS);
+  // * generate reset password code
+  const code = generateUniqueString(6);
 
-  // * update OTP in User model
-  user.passwordResetOTP = {
-    code: hashedOTP,
-    expiresAt: otpExpiration,
-  };
+  // * hash code
+  const hashCode = bcryptjs.hashSync(code, +process.env.SALT_ROUNDS);
+
+  // * generate token to reset password
+  const token = jwt.sign(
+    {
+      email,
+      forgetCode: hashCode,
+    },
+    process.env.RESET_Token,
+    { expiresIn: "1h" }
+  );
+
+  const resetPasswordLink = `${req.protocol}://${req.headers.host}/user/resetPassword/${token}`;
+
+  // * send reset password email to the user and check if sent
+  const isEmailSent = await sendEmailService({
+    to: email,
+    subject: "Reset Password",
+    message: `
+    <h2>Please click on this link to reset password</h2>
+    <a href="${resetPasswordLink}">Verify Email</a>`,
+  });
+  if (!isEmailSent) {
+    return next(`Email is not sent,please try again later`, { cause: 409 });
+  }
+
+  // * saved changes
+  user.forgetCode = hashCode;
+  await user.save();
+
+  // * response successfully
+  res.status(200).json({ message: `code sent successfully`, user });
+};
+
+//==================================  reset password =========================//
+/**
+ * * destructure data from params
+ * * decoded token
+ * * get user by email and code
+ * * destructure data from body
+ * * hash new password
+ * * saved changes
+ * * response successfully
+ */
+export const resetPassword = async (req, res, next) => {
+  // * destructure data from params
+  const { token } = req.params;
+
+  // * decoded token
+  const decoded = jwt.verify(token, process.env.RESET_TOKEN);
+
+  // * get user by email and code
+  const user = await User.findOne({
+    email: decoded?.email,
+    forgetCode: decoded?.forgetCode,
+  });
+  if (!user) {
+    return next("you already reset your password", { cause: 404 });
+  }
+
+  // * destructure data from body
+  const { newPassword } = req.body;
+
+  // * hash new password
+  const newPasswordHash = bcryptjs.hashSync(
+    newPassword,
+    +process.env.SALT_ROUNDS
+  );
+
+  // * saved changes
+  user.password = newPasswordHash;
+  user.forgetCode = null;
   await user.save();
 
   // * response successfully
   res
     .status(200)
-    .json({ success: true, message: "User updated OTP", data: otp });
-};
-
-//=============================== Reset Password After OTP =================================//
-/**
- * * destructuring data from req.body
- * * check user is already exists
- * * check OTP is match code OTP and expired OTP
- * * hash password by bcryptjs and check if not hashed
- * * update password by save method
- * * response successfully
- */
-export const resetPasswordAfterOTP = async (req, res, next) => {
-  // * destructuring data from req.body
-  const { email, otp, newPassword } = req.body;
-
-  // * check user is already exists
-  const user = await User.findOne({ email });
-  if (!user) return next("User not found", { cause: 400 });
-  console.log(otp, user.passwordResetOTP);
-  // * check OTP is match code OTP and expired OTP
-  const matchedOTP = bcryptjs.compareSync(otp, user.passwordResetOTP.code);
-
-  if (!matchedOTP || new Date() > user.passwordResetOTP.expiresAt) {
-    return next(new Error("Invalid or expired OTP", { cause: 401 }));
-  }
-
-  // * hash password by bcryptjs and check if not hashed
-  const hashNewPassword = bcryptjs.hashSync(
-    newPassword,
-    +process.env.SALT_ROUNDS
-  );
-  if (!hashNewPassword) {
-    return next("hash password failed", { cause: 400 });
-  }
-
-  // * update password by save method
-  user.password = hashNewPassword;
-  await user.save();
-
-  // * response successful
-  res
-    .status(200)
-    .json({ success: true, message: "Password updated", data: user });
+    .json({ message: `password changed successfully`, data: user });
 };
 
 //=============================== update password User =================================//
