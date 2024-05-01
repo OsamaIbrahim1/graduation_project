@@ -4,6 +4,7 @@ import User from "../../DB/models/user.model.js";
 export const auth = (accessRoles) => {
   return async (req, res, next) => {
     try {
+      console.log("req.headers: ", req.headers);
       const { accesstoken } = req.headers;
 
       if (!accesstoken)

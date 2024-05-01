@@ -3,7 +3,7 @@ import { Types } from "mongoose";
 
 const objectIdValidation = (value, helper) => {
   const isValid = Types.ObjectId.isValid(value);
-  return (isValid ? value : helper.message("invalid objectId"));
+  return isValid ? value : helper.message("invalid objectId");
 };
 
 export const generalRules = {
@@ -16,8 +16,8 @@ export const generalRules = {
     "content-type": Joi.string(),
     "content-length": Joi.string(),
     "user-agent": Joi.string(),
-    accept: Joi.string(),
-    "accept-encoding": Joi.string(),
-    connection: Joi.string(),
-  }),
+    // accept: Joi.string(),
+    // "accept-encoding": Joi.string(),
+    // connection: Joi.string(),
+  })  .unknown(true),
 };
